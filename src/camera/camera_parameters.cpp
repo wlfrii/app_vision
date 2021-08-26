@@ -95,23 +95,23 @@ CameraParameters::_precision_ CameraParameters::getP2() const
 {
     return _D.at<_precision_>(4, 0);
 }
-const cv::Mat& CameraParameters::intrinsic() const
+const cv::Mat& CameraParameters::getIntrinsic() const
 {
     return _A;
 }
-const cv::Mat& CameraParameters::distCoeffs() const
+const cv::Mat& CameraParameters::getDistCoeffs() const
 {
     return _D;
 }
-const cv::Mat& CameraParameters::rectifyMat() const
+const cv::Mat& CameraParameters::getRectifyMat() const
 {
     return _R;
 }
-const cv::Mat& CameraParameters::newIntrinsic() const
+const cv::Mat& CameraParameters::getNewIntrinsic() const
 {
     return _Anew;
 }
-const cv::Rect& CameraParameters::roi() const
+const cv::Rect& CameraParameters::getROI() const
 {
     return _ROI;
 }
@@ -164,6 +164,9 @@ CameraParamsYMLReader::CameraParamsYMLReader(const std::string &cam_params_path)
         _is_valid_path = false;
     }
     _is_valid_path = true;
+
+    _fs["image_width"] >> _frame_width;
+    _fs["image_height"] >> _frame_height;
 }
 
 CameraParamsYMLReader::~CameraParamsYMLReader()
@@ -227,15 +230,6 @@ std::shared_ptr<StereoCameraParameters> CameraParamsYMLReader::getStereoCameraPa
         params[i] = getCameraParameters(i);
     }
     return std::make_shared<StereoCameraParameters>(params[0], params[1]);
-}
-
-void CameraParamsYMLReader::getImageSize(int &width, int &height) const
-{
-    if (!_is_valid_path)
-        return;
-
-    _fs["image_width"] >> width;
-    _fs["image_height"] >> height;
 }
 
 
@@ -304,10 +298,10 @@ CameraParamsCSVReader::CameraParamsCSVReader(const std::string &cam_params_path)
         cv::Rect roi(data[0], data[1], data[2], data[3]);
         return roi;
     };
-    _width = getData("width");
-    _height = getData("height");
-    double fov = getData("fov");
-    double t = getData("t");
+    _frame_width = getData("width");
+    _frame_height = getData("height");
+    _cam_fov = getData("fov");
+    _cam_distance = getData("t");
 
     cv::Mat A1, A2, Anew, D1, D2, R1, R2;
     cv::Rect roi1, roi2;
@@ -359,12 +353,6 @@ std::shared_ptr<StereoCameraParameters> CameraParamsCSVReader::getStereoCameraPa
     if (!_is_valid_path)
         return nullptr;
     return _stereo_cam_params;
-}
-
-void CameraParamsCSVReader::getImageSize(int &width, int &height) const
-{
-    width = _width;
-    height = _height;
 }
 
 

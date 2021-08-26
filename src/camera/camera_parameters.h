@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <cstdint>
 #include <opencv2/opencv.hpp>
 #if __linux__ && 0
 #include "usb/usb_camera_parameters.h"
@@ -37,11 +38,11 @@ public:
     _precision_ getP1() const;     //!< tangentia distortion p1
     _precision_ getP2() const;     //!< tangentia distortion p2
 
-    const cv::Mat& intrinsic() const;       //!< the intrinsic mat 3x3
-    const cv::Mat& distCoeffs() const;      //!< the dist_coeffs mat 1x5
-    const cv::Mat& rectifyMat() const;      //!< the rectification mat 3x3
-    const cv::Mat& newIntrinsic() const;    //!< the new_intrinsic mat 3x3
-    const cv::Rect& roi() const;            //!< the roi in the image map [x,y,width,height]
+    const cv::Mat&  getIntrinsic() const;       //!< the intrinsic mat 3x3
+    const cv::Mat&  getDistCoeffs() const;      //!< the dist_coeffs mat 1x5
+    const cv::Mat&  getRectifyMat() const;      //!< the rectification mat 3x3
+    const cv::Mat&  getNewIntrinsic() const;    //!< the new_intrinsic mat 3x3
+    const cv::Rect& getROI() const;             //!< the roi in the image map [x,y,width,height]
 
     std::string getInfo() const;
 
@@ -52,7 +53,6 @@ private:
     cv::Rect        _ROI;                    //!< region of interest [x,y,width,height]
     cv::Mat         _Anew;                   //!< new intrinsic parameters 3x3
 };
-
 
 
 /** @brief Store the parameters for monocular.
@@ -90,9 +90,18 @@ public:
     }
 
     /* these fucntions must be called */
-    virtual void	getImageSize(int &width, int &height) const {}
+    uint16_t getFrameWidth() const { return _frame_width; }
+    uint16_t getFrameHeight() const { return _frame_height; }
+    double   getCamDistance() const { return _cam_distance; }
+    double   getCamFOV() const { return _cam_fov; }
 protected:
     bool _is_valid_path;
+
+    uint16_t _frame_width;
+    uint16_t _frame_height;
+
+    double _cam_distance;
+    double _cam_fov;
 };
 
 
@@ -104,8 +113,6 @@ public:
 
     std::shared_ptr<CameraParameters> getCameraParameters(uint8_t index) const override;
     std::shared_ptr<StereoCameraParameters> getStereoCameraParameters() const override;
-
-    void getImageSize(int &width, int &height) const override;
 
 private:
 	/* WARNING!!!, this initialization must be done in the intializer list,
@@ -123,11 +130,7 @@ public:
     std::shared_ptr<CameraParameters> getCameraParameters(uint8_t index) const override;
     std::shared_ptr<StereoCameraParameters> getStereoCameraParameters() const override;
 
-    void getImageSize(int &width, int &height) const override;
-
 private:
-    int _width;
-    int _height;
     std::shared_ptr<StereoCameraParameters> _stereo_cam_params;
 };
 
