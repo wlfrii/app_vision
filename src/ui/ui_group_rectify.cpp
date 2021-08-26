@@ -71,7 +71,7 @@ QWidget* UIGroupRectify::create()
 void UIGroupRectify::setProperty()
 {
 	
-	UILogger::getInstance()->log(QString("Rectify: set map."));
+    UILog(QString("Rectify: set map."));
 
 	//gpu::AlgoPipelineManager::getInstance()->setProperty(std::make_shared<gpu::NonuniformProperty>(magnify, magnify0));
 }
@@ -84,14 +84,14 @@ void UIGroupRectify::onChkBoxRectifySelected()
         //pbtn_cam_param->setEnabled(true);
         //pbtn_view_cam_param->setEnabled(true);
         CMD::is_rectify = true;
-		UILogger::getInstance()->log(QString("Open rectification"));
+        UILog(QString("Open rectification"));
 	}
 	else
 	{
         //pbtn_cam_param->setEnabled(false);
         //pbtn_view_cam_param->setEnabled(false);
         CMD::is_rectify = false;
-		UILogger::getInstance()->log(QString("Close rectification"));
+        UILog(QString("Close rectification"));
 	}
 }
 
@@ -99,9 +99,13 @@ void UIGroupRectify::onChkBoxRectifySelected()
 void UIGroupRectify::onPushBtnCamParamClicked()
 {
     QString cam_params_path = QFileDialog::getOpenFileName(this, "File Dialog", "../", "Camera Parameters File(*.yml *.csv *.sr)");
+    if(cam_params_path.toStdString().empty()){
+        return;
+    }
+
     _lEdit_cam_params->setText(cam_params_path);
 
-    UILogger::getInstance()->log(QString("Load camera parameters: ") + cam_params_path);
+    UILog(QString("Load camera parameters: ") + cam_params_path);
 
     QFileInfo fileinfo(cam_params_path);
     QString filesuffix = fileinfo.suffix();
