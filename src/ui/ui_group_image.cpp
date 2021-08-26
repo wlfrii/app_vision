@@ -12,6 +12,9 @@
 #include "../image/frame_displayer.h"
 #include "control_panel.h"
 
+constexpr uint16_t TIMER_IMAGE_INTERVAL = 500;
+constexpr uint16_t TIMER_VIDEO_INTERVAL = 30;
+
 UIGroupImage::UIGroupImage()
 {
 
@@ -107,7 +110,7 @@ QWidget* UIGroupImage::create()
         tr("Image Files(*bmp *png *jpg)"));                             \
     image = cv::imread(image_path.toStdString());                       \
     CHECK_LOADED_IMAGE(image);                                          \
-    ControlPanel::timer_imshow->start(500);                             \
+    ControlPanel::timer_imshow->start(TIMER_IMAGE_INTERVAL);            \
 }
 
 void UIGroupImage::onPushBtnLoadLeftImageClicked()
@@ -163,7 +166,7 @@ void UIGroupImage::onPushBtnLoadStereoVideoClicked()
         path.isEmpty() ? "../" : path,
         tr("Image Files(*mp4 *avi)"));
     if(VisionManager::getInstance()->handleVideo(path.toStdString())){
-        ControlPanel::timer_vdshow->start(30);
+        ControlPanel::timer_vdshow->start(TIMER_VIDEO_INTERVAL);
     }
 }
 
@@ -182,10 +185,32 @@ void UIGroupImage::onPushBtnCloseClicked()
 
 void UIGroupImage::onPushBtnPauseClicked()
 {
-    if(_pbtn_pause->isChecked()){
+    enum{
+        TIMER_IMAGE,
+        TIMER_VIDEO
+    };
+    static uint8_t timer_id = -1;
+    if(_pbtn_pause->text() == "Pause"){
         _pbtn_pause->setText("Go on");
+        if(ControlPanel::timer_imshow->isActive()){
+            timer_id = TIMER_IMAGE;
+            ControlPanel::timer_imshow->stop();
+        }
+        else if(ControlPanel::timer_vdshow->isActive()){
+            timer_id = TIMER_VIDEO;
+            ControlPanel::timer_vdshow->stop();
+        }
     }
     else{
+        switch(timer_id){
+        case TIMER_IMAGE:
+            ControlPanel::timer_imshow->start(TIMER_IMAGE_INTERVAL);
+            break;
+        case TIMER_VIDEO:
+            ControlPanel::timer_vdshow->start(TIMER_VIDEO_INTERVAL);
+            break;
+        }
+        timer_id = -1;
         _pbtn_pause->setText("Pause");
     }
 }
