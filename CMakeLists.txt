@@ -111,6 +111,12 @@ if(WITH_QT_GUI)
     message(STATUS "Qt6 directory: ${Qt6_DIR}")
 endif(WITH_QT_GUI)
 
+# @lib_instrument
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../buildtarget/)
+find_package(lib_instrument REQUIRED)
+
+# @Eigen
+find_package(EIGEN3 REQUIRED)
 
 # --------------------------------------------------------------------
 #                   Create target and set properties
@@ -132,17 +138,20 @@ message("CMAKE_INCLUDE_CURRENT_DIR 2:${CMAKE_INCLUDE_CURRENT_DIR}")
 
 ## ------------- Include the Header files ------------- ##
 target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/camera>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/image>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/def>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/ui>
-        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
 )
 
 # Link external library
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
+    ${lib_instrument_LIBRARIES}
 )
 if(WITH_GL)
     target_link_libraries(${PROJECT_NAME}

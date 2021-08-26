@@ -13,7 +13,7 @@
 class FrameDisplayer
 {
 public:
-    FrameDisplayer(std::string window_name);
+    FrameDisplayer(std::string window_name = "Display Window");
     ~FrameDisplayer();
 
     /**

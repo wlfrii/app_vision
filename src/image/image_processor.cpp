@@ -8,6 +8,9 @@
 #ifdef WITH_CUDA
 #include <libvisiongpu/gpu_algorithm_pipeline_manager.h>
 #endif
+#include <lib_instrument/lib_instrument.h>
+#include <vector>
+#include <Eigen/Dense>
 
 
 ImageProcessor::ImageProcessor()
@@ -54,6 +57,56 @@ bool ImageProcessor::processImage(const cv::Mat &input, cv::Mat &output, uint8_t
 
 void ImageProcessor::processImageOnCPU(const cv::Mat& image, uint8_t cam_id)
 {
+    // --- 2021.8.25 Testing ---
+    static bool is_test = true;
+    if(is_test && props[cam_id]->map_calculator){
+        //is_test = false;
+        printf("do testing\n");
+
+        Instrument instrument;
+        instrument.setInstrumentType(INSTRUMENT_TYPE_LAPAROSCOPE);
+        std::vector<Eigen::Vector3f> ws_clouds = instrument.getWSClouds();
+
+        auto cam_params = props[cam_id]->map_calculator->getCamParams();
+        auto A = cam_params->getIntrinsic();
+
+        Eigen::Vector3f cam_pt;
+        double t = 3.9812;
+        cv::Mat ar_image;
+        ar_image = cv::Mat::zeros(1080, 1920, CV_8UC3);
+
+
+        for(auto& pt:ws_clouds){
+            int k = cam_id == 0 ? 1 : -1;
+            cam_pt = pt + k * Eigen::Vector3f(t/2, 0, 0);
+            cam_pt /= cam_pt[2];
+
+            int u = static_cast<int>(A.at<double>(0,0)*cam_pt[0] + A.at<double>(0,2));
+            int v = static_cast<int>(A.at<double>(1,1)*cam_pt[1] + A.at<double>(1,2));
+
+            if(u >= 0 && u <= 1919 && v >= 0 && v <= 1079){
+                int r = 30;
+                for(int uu = u-r; uu<=u+r; uu++){
+                    if(uu < 0 || uu > 1920){
+                        continue;
+                    }
+                    for(int vv = v-r; vv<v+r; vv++){
+                        if(vv < 0 || vv > 1080){
+                            continue;
+                        }
+                        ar_image.at<cv::Vec3b>(v, u)[0] = 255;
+                        ar_image.at<cv::Vec3b>(v, u)[1] = 255;
+                        ar_image.at<cv::Vec3b>(v, u)[2] = 255;
+                    }
+                }
+            }
+        }
+        cv::cvtColor(ar_image, props[cam_id]->processed_image, cv::COLOR_BGR2BGRA);
+        props[cam_id]->image_buffer.insert(props[cam_id]->processed_image);
+        return;
+    }
+    // -------------------------
+
     if (props[cam_id]->map_calculator == nullptr || !CMD::is_rectify) {
 		cv::cvtColor(image, props[cam_id]->processed_image, cv::COLOR_BGR2BGRA);
     }
@@ -64,6 +117,7 @@ void ImageProcessor::processImageOnCPU(const cv::Mat& image, uint8_t cam_id)
         cv::remap(image, temp, mapx, mapy, cv::INTER_LINEAR, cv::BORDER_CONSTANT, 0);
         cv::cvtColor(temp, props[cam_id]->processed_image, cv::COLOR_BGR2BGRA);
     }
+
 	// Put image in buffer
     if (!props[cam_id]->processed_image.empty()){
 		props[cam_id]->image_buffer.insert(props[cam_id]->processed_image);

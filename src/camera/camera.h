@@ -9,14 +9,14 @@ class FrameDisplayer;
 class Camera
 {
 public:
-    Camera(uchar usb_id, uchar cam_id, uint image_width, uint image_height);
+    Camera(uchar usb_id, uchar cam_id);
 
     ~Camera();
 
 private:
     void run [[noreturn]] ();
 
-private:
+
     uchar           _id;
     std::thread     _thread;
 

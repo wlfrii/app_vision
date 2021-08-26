@@ -19,10 +19,8 @@ public:
      * @brief For active camera to grab frame stream.
      * @param usb_id        USB ID of the camera
      * @param cam_id        Camera ID
-     * @param image_width
-     * @param image_height
      */
-    explicit FrameReader(uchar usb_id, uchar cam_id, uint image_width, uint image_height);
+    explicit FrameReader(uchar usb_id, uchar cam_id);
 
     /**
      * @brief For read frame stream form a specified video.
@@ -40,8 +38,6 @@ public:
 private:
     uchar   _usb_id;                        //!< the usb id of camera
     uchar   _cam_id;						//!< the cam id of camera
-    uint	_image_width;					//!< width of the image
-    uint	_image_height;					//!< height of the image
 
     uchar	_sharpness;						//!< the sharpness of the image
 

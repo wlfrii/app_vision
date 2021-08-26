@@ -139,9 +139,9 @@ void UIGroupImage::onPushBtnLoadStereoImageClicked()
 
     int width = image.cols;
     cv::Mat temp = image.colRange(0, width / 2);
-    VisionManager::getInstance()->handleImage(image, vision::RIGHT_CAMERA);
+    VisionManager::getInstance()->handleImage(temp, vision::LEFT_CAMERA);
     temp = image.colRange(width / 2, width);
-    VisionManager::getInstance()->handleImage(image, vision::RIGHT_CAMERA);
+    VisionManager::getInstance()->handleImage(temp, vision::RIGHT_CAMERA);
 }
 
 void UIGroupImage::onPushBtnLoadLeftVideoClicked()
@@ -158,13 +158,26 @@ void UIGroupImage::onPushBtnLoadRightVideoClicked()
 
 void UIGroupImage::onPushBtnLoadStereoVideoClicked()
 {
-
+    static QString path;
+    path = QFileDialog::getOpenFileName(this, tr("File dialog"),
+        path.isEmpty() ? "../" : path,
+        tr("Image Files(*mp4 *avi)"));
+    if(VisionManager::getInstance()->handleVideo(path.toStdString())){
+        ControlPanel::timer_vdshow->start(30);
+    }
 }
 
 void UIGroupImage::onPushBtnCloseClicked()
 {
-    ControlPanel::timer_imshow->stop();
-    VisionManager::getInstance()->closeImageWindow();
+    if(ControlPanel::timer_imshow->isActive()){
+        ControlPanel::timer_imshow->stop();
+        VisionManager::getInstance()->closeImageWindow();
+    }
+
+    if(ControlPanel::timer_vdshow->isActive()){
+        ControlPanel::timer_vdshow->stop();
+        VisionManager::getInstance()->closeVideoWindow();
+    }
 }
 
 void UIGroupImage::onPushBtnPauseClicked()

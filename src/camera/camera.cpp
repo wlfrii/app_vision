@@ -7,18 +7,19 @@
 //#include <libutility/timer/mtimer.h>
 #include "../def/mtimer.h"
 
-Camera::Camera(uchar usb_id, uchar cam_id, uint image_width, uint image_height)
+Camera::Camera(uchar usb_id, uchar cam_id)
     : _id(cam_id)
-    , _frame_reader(new FrameReader(usb_id, cam_id, image_width, image_height))
+    , _frame_reader(new FrameReader(usb_id, cam_id))
 {
     _thread = std::thread(&Camera::run, this);
     _thread.detach();
-    //_frame_displayer = FrameDisplayer::createInstance();
+    _frame_displayer = new FrameDisplayer();
 }
 
 Camera::~Camera()
 {
     DELETE_PIONTER(_frame_reader);
+    DELETE_PIONTER(_frame_displayer);
 }
 
 void Camera::run()

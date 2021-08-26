@@ -11,6 +11,7 @@
 #include <QFont>
 
 QTimer* ControlPanel::timer_imshow = new QTimer();
+QTimer* ControlPanel::timer_vdshow = new QTimer();
 
 ControlPanel::ControlPanel(QWidget *parent)
     : QWidget(parent)
@@ -18,7 +19,7 @@ ControlPanel::ControlPanel(QWidget *parent)
     setupUI();
 
     connect(timer_imshow, &QTimer::timeout, this, &ControlPanel::onTimerImshow);
-    //connect(timer_imshow, &QTimer::timeout, this, &VisionManager::initImageHandle);
+    connect(timer_vdshow, &QTimer::timeout, this, &ControlPanel::onTimerVdshow);
 }
 
 
@@ -48,8 +49,6 @@ void ControlPanel::setupUI()
     /** CONTROL **/
     vlayout->addWidget(UIGroupImage::getInstance()->create());
 
-
-
     /** CAMERA **/
     vlayout->addWidget(UIGroupCamera::getInstance()->create());
 
@@ -72,8 +71,14 @@ void ControlPanel::setupUI()
 
 void ControlPanel::onTimerImshow()
 {
-    //FrameDisplayer::getInstance()->showFrame();
     VisionManager::getInstance()->showImage();
+}
+
+void ControlPanel::onTimerVdshow()
+{
+    if(!VisionManager::getInstance()->showVideo()){
+        timer_vdshow->stop();
+    }
 }
 
 #endif // WITH_QT_GUI

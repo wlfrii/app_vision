@@ -77,7 +77,7 @@ namespace
 }
 
 
-FrameDisplayer::FrameDisplayer(std::string window_name)
+FrameDisplayer::FrameDisplayer(std::string window_name/* = Display Window */)
     : _window_width(0)
     , _window_height(0)
     , _window_name(window_name)
@@ -99,8 +99,11 @@ void FrameDisplayer::updateFrame(cv::Mat &image, uchar cam_id)
             cv::cvtColor(image, temp, cv::COLOR_BGR2BGRA);
             temp.copyTo(_images[cam_id]);
         }
-        else{
+        else if(image.type() == CV_8UC4){
             image.copyTo(_images[cam_id]);
+        }
+        else{
+            LOG("The displayed image should be converted into CV_8UC4");
         }
     }
 }

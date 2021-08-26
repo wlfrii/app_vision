@@ -54,21 +54,25 @@ public:
     void openCamera();
     void closeCamera();
 
+    // For handle image window
     void handleImage(cv::Mat& image, uint8_t id);
     void showImage();
     void closeImageWindow();
 
-    void handleVideo();
+    // For handle video window
+    bool handleVideo(std::string video_path);
+    bool showVideo();
+    void closeVideoWindow();
 
 private:
-    CameraHandle*   camera_handle;
-    std::thread     _thread;
-
-    std::string     _cam_params_info;
-
+    // For image window
     cv::Mat _images[vision::MAX_CAMERA_NUMBER];
     cv::Mat _processed_images[vision::MAX_CAMERA_NUMBER];
     std::shared_ptr<FrameDisplayer> _image_displayer;
+
+    // For video window
+    cv::VideoCapture _video_capture;
+
 };
 
 #endif // VISION_MANAGER_H_LF

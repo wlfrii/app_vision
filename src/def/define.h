@@ -42,6 +42,9 @@ class CameraParamsReader;
 
 namespace vision
 {
+    extern double camera_distance;
+    extern double camera_fov;
+
     /** @brief This struct is use to specify the size of image displaying.
       The default size is set to 1080x1920.
     */

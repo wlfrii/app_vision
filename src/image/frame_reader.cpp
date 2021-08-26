@@ -16,11 +16,9 @@ namespace
 
 
 // #ifdef __linux__
-FrameReader::FrameReader(uchar usb_id, uchar cam_id, uint image_width, uint image_height)
+FrameReader::FrameReader(uchar usb_id, uchar cam_id)
     : _usb_id(usb_id)
     , _cam_id(cam_id)
-    , _image_width(image_width)
-    , _image_height(image_height)
     , _sharpness(3)
 {
     // capture = new V4L2Capture(image_width, image_height, 3);
@@ -32,8 +30,6 @@ FrameReader::FrameReader(uchar usb_id, uchar cam_id, uint image_width, uint imag
 FrameReader::FrameReader(const std::string& video_path)
     : _usb_id(0)
     , _cam_id(0)
-    , _image_width(0)
-    , _image_height(0)
     , _sharpness(3)
 {
     _video_capture.open(video_path);
