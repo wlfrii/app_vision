@@ -2,43 +2,30 @@
 #include "../def/define.h"
 
 
-MapCalculator::MapCalculator(std::shared_ptr<CameraParameters> cam_params, uint16_t image_width, uint16_t image_height)
+MapCalculator::MapCalculator(std::shared_ptr<CameraParameters> cam_params)
     : _camera_params(cam_params)
-    , _image_width(image_width)
-    , _image_height(image_height)
 {
+
     initMat();
-
-    _double_mapx.create(_image_height*2, _image_width*2, CV_32FC1);
-    _double_mapy.create(_image_height*2, _image_width*2, CV_32FC1);
     calcImageMap(_camera_params, _double_mapx, _double_mapy);
-
-    updateMap(0);
-}
-
-void MapCalculator::updateMap(int disparity)
-{
-    cv::Rect roi = _camera_params->getROI();
-    /* Although there we designate as a monocular map, we keep the disparity adjustment */
-    roi.x -= disparity;
-
-    _cpu_mapx = _double_mapx(roi).clone();
-    _cpu_mapy = _double_mapy(roi).clone();
-#ifdef WITH_CUDA
-    _gpu_mapx.upload(_cpu_mapx);
-    _gpu_mapy.upload(_cpu_mapy);
-#endif
+    updateMap();
 }
 
 
 void MapCalculator::initMat()
 {
+    int image_width = _camera_params->getFrameWidth();
+    int image_height = _camera_params->getFrameHeight();
+
+    _double_mapx.create(image_height*2, image_width*2, CV_32FC1);
+    _double_mapy.create(image_height*2, image_width*2, CV_32FC1);
+
 #ifdef WITH_CUDA
-    _gpu_mapx.create(_image_height, _image_width, CV_32FC1);
-    _gpu_mapy.create(_image_height, _image_width, CV_32FC1);
+    _gpu_mapx.create(image_height, image_width, CV_32FC1);
+    _gpu_mapy.create(image_height, image_width, CV_32FC1);
 #endif
-    _cpu_mapx.create(_image_height, _image_width, CV_32FC1);
-    _cpu_mapy.create(_image_height, _image_width, CV_32FC1);
+    _cpu_mapx.create(image_height, image_width, CV_32FC1);
+    _cpu_mapy.create(image_height, image_width, CV_32FC1);
 }
 
 
@@ -94,4 +81,16 @@ void MapCalculator::calcImageMap(std::shared_ptr<CameraParameters> cam_params, c
             mapy_row[u - 1] = static_cast<float>(fy * vd + cy);
         }
     }
+}
+
+void MapCalculator::updateMap()
+{
+    cv::Rect roi = _camera_params->getROI();
+
+    _cpu_mapx = _double_mapx(roi).clone();
+    _cpu_mapy = _double_mapy(roi).clone();
+#ifdef WITH_CUDA
+    _gpu_mapx.upload(_cpu_mapx);
+    _gpu_mapy.upload(_cpu_mapy);
+#endif
 }

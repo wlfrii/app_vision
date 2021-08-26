@@ -116,6 +116,16 @@ const cv::Rect& CameraParameters::getROI() const
     return _ROI;
 }
 
+uint16_t CameraParameters::getFrameWidth() const
+{
+    return _ROI.width;
+}
+
+uint16_t CameraParameters::getFrameHeight() const
+{
+    return _ROI.height;
+}
+
 std::string CameraParameters::getInfo() const
 {
 
@@ -165,8 +175,8 @@ CameraParamsYMLReader::CameraParamsYMLReader(const std::string &cam_params_path)
     }
     _is_valid_path = true;
 
-    _fs["image_width"] >> _frame_width;
-    _fs["image_height"] >> _frame_height;
+//    _fs["image_width"] >> _frame_width;
+//    _fs["image_height"] >> _frame_height;
 }
 
 CameraParamsYMLReader::~CameraParamsYMLReader()
@@ -298,8 +308,8 @@ CameraParamsCSVReader::CameraParamsCSVReader(const std::string &cam_params_path)
         cv::Rect roi(data[0], data[1], data[2], data[3]);
         return roi;
     };
-    _frame_width = getData("width");
-    _frame_height = getData("height");
+    int frame_width = getData("width");
+    int frame_height = getData("height");
     _cam_fov = getData("fov");
     _cam_distance = getData("t");
 

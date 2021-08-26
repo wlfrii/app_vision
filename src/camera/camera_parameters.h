@@ -1,15 +1,38 @@
+/**
+ * @file camera_parameters.h
+ *
+ * @author Longfei Wang (longfei.wang@sjtu.edu.cn)
+ *
+ * @brief This file including several class is designed to handle camera parameters.
+ *
+ * class CameraParamters --- is designed to store the necessary camera parameters.
+ *
+ * class StereoCameraParameters --- includeing two 'CameraParamters' objecs is
+ *                                  designed for stereo camera.
+ *
+ * class CameraParamsReader --- is the base class for load camera parameters.
+ *          |_ class CameraParamsYMLReader --- is for loading YML file
+ *          |_ class CameraParamsCSVReader --- is for loading csv(sr) file
+ *
+ * class CameraParamsReaderFactory --- is used to create an CameraParamsReader object.
+ *
+ * @version 2.0
+ *
+ * @date 2020-01-01
+ *
+ * @copyright Copyright (c) 2020
+ *
+ */
 #pragma once
 #include <string>
 #include <memory>
 #include <cstdint>
 #include <opencv2/opencv.hpp>
-#if __linux__ && 0
-#include "usb/usb_camera_parameters.h"
-#endif
 
 
-/** @brief Store the parameters for monocular.
-*/
+/**
+ * @brief Store the parameters for monocular.
+ */
 class CameraParameters
 {
 public:
@@ -44,6 +67,9 @@ public:
     const cv::Mat&  getNewIntrinsic() const;    //!< the new_intrinsic mat 3x3
     const cv::Rect& getROI() const;             //!< the roi in the image map [x,y,width,height]
 
+    uint16_t getFrameWidth() const;
+    uint16_t getFrameHeight() const;
+
     std::string getInfo() const;
 
 private:
@@ -55,8 +81,9 @@ private:
 };
 
 
-/** @brief Store the parameters for monocular.
-*/
+/**
+ * @brief Store the parameters for monocular.
+ */
 class StereoCameraParameters
 {
 public:
@@ -67,13 +94,14 @@ public:
 
     std::string getInfo() const;
 
-	std::shared_ptr<CameraParameters> left;
-	std::shared_ptr<CameraParameters> right;
+    std::shared_ptr<CameraParameters> left;
+    std::shared_ptr<CameraParameters> right;
 };
 
 
-/** @brief The tool for read parameters of monocular or binocular.
-*/
+/**
+ * @brief The tool for read parameters of monocular or binocular.
+ */
 class CameraParamsReader
 {
 public:
@@ -90,21 +118,18 @@ public:
     }
 
     /* these fucntions must be called */
-    uint16_t getFrameWidth() const { return _frame_width; }
-    uint16_t getFrameHeight() const { return _frame_height; }
     double   getCamDistance() const { return _cam_distance; }
     double   getCamFOV() const { return _cam_fov; }
 protected:
     bool _is_valid_path;
 
-    uint16_t _frame_width;
-    uint16_t _frame_height;
-
     double _cam_distance;
     double _cam_fov;
 };
 
-
+/**
+ * @brief Read camera paramters from YML file.
+ */
 class CameraParamsYMLReader : public CameraParamsReader
 {
 public:
@@ -115,12 +140,14 @@ public:
     std::shared_ptr<StereoCameraParameters> getStereoCameraParameters() const override;
 
 private:
-	/* WARNING!!!, this initialization must be done in the intializer list,
-	  or there maybe exist a situation that fs is initialized twice */
+    /* WARNING!!!, this initialization must be done in the intializer list,
+      or there maybe exist a situation that fs is initialized twice */
     cv::FileStorage _fs;
 };
 
-
+/**
+ * @brief Read camera paramters from csv(sr) file.
+ */
 class CameraParamsCSVReader : public CameraParamsReader
 {
 public:
