@@ -5,6 +5,16 @@
 #include <vector>
 #include "../def/define.h"
 
+#ifdef WITH_QT_GUI
+class QLabel;
+#endif
+
+enum FrameDisplayWindowType{
+    WINDOW_TYPE_NORMAL_STEREO,  //!< The window wil be initialized as 1920 x 540 resolution.
+    WINDOW_TYPE_GOOVIS,         //!< For displaying stereo vision in goovis.
+    WINDOW_TYPE_COUNT
+};
+
 /**
  * @brief This class is designed to display the binocular view.
  * Since there needs only one window to show the frames even there is more
@@ -13,7 +23,7 @@
 class FrameDisplayer
 {
 public:
-    FrameDisplayer(std::string window_name = "Display Window");
+    FrameDisplayer(const FrameDisplayWindowType& type = WINDOW_TYPE_NORMAL_STEREO);
     ~FrameDisplayer();
 
     /**
@@ -35,10 +45,16 @@ private:
 private:
     std::array<cv::Mat, vision::MAX_CAMERA_NUMBER> _images;
 
+    FrameDisplayWindowType _type;
+
     int         _window_width;
     int         _window_height;
     std::string _window_name;
     static std::vector<std::string> _window_names;
+
+#ifdef WITH_QT_GUI
+    QLabel* _display_label;
+#endif
 };
 
 #endif // FRAME_DISPLAYER_H

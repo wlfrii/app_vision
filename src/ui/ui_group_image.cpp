@@ -165,31 +165,38 @@ void UIGroupImage::onPushBtnLoadStereoVideoClicked()
     path = QFileDialog::getOpenFileName(this, tr("File dialog"),
         path.isEmpty() ? "../" : path,
         tr("Image Files(*mp4 *avi)"));
+    UI_CHECK_LOAD_PATH(path);
+    UILogger::getInstance()->log(QString("Load stereo video from \"%1\".").arg(path));
+
     if(VisionManager::getInstance()->handleVideo(path.toStdString())){
         ControlPanel::timer_vdshow->start(TIMER_VIDEO_INTERVAL);
     }
 }
 
+enum{
+    TIMER_IMAGE,
+    TIMER_VIDEO
+};
+uint8_t timer_id = -1;
+
 void UIGroupImage::onPushBtnCloseClicked()
 {
-    if(ControlPanel::timer_imshow->isActive()){
+    if(ControlPanel::timer_imshow->isActive() || timer_id == TIMER_IMAGE){
         ControlPanel::timer_imshow->stop();
         VisionManager::getInstance()->closeImageWindow();
     }
 
-    if(ControlPanel::timer_vdshow->isActive()){
+    if(ControlPanel::timer_vdshow->isActive() || timer_id == TIMER_VIDEO){
         ControlPanel::timer_vdshow->stop();
         VisionManager::getInstance()->closeVideoWindow();
     }
+
+    timer_id = -1;
+    _pbtn_pause->setText("Pause");
 }
 
 void UIGroupImage::onPushBtnPauseClicked()
 {
-    enum{
-        TIMER_IMAGE,
-        TIMER_VIDEO
-    };
-    static uint8_t timer_id = -1;
     if(_pbtn_pause->text() == "Pause"){
         _pbtn_pause->setText("Go on");
         if(ControlPanel::timer_imshow->isActive()){
@@ -214,21 +221,5 @@ void UIGroupImage::onPushBtnPauseClicked()
         _pbtn_pause->setText("Pause");
     }
 }
-
-//void UIGroupImage::onPushBtnProcessClicked()
-//{
-//    static std::atomic<bool> flag(false);
-//    bool ret = true;
-//    while (!flag) {
-//        //gpu::AlgoPipelineManager::getInstance()->process(image, image_processed, flag);
-//        if (!ret) break;
-//    }
-//    if (!ret) {
-//        UILogger::getInstance()->log(QString("Failed to process the image."));
-//        return;
-//    }
-//    flag.store(false, std::memory_order_relaxed);
-//    //::imshow(image, image_processed);
-//}
 
 #endif // WITH_QT_GUI

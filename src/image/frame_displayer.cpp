@@ -13,53 +13,33 @@
 #include <unistd.h>
 #include <sys/stat.h> ////@func int mkdir(const char *pathname, mode_t mode), int rmdir(const char *_Path)
 #endif
-
+#ifdef WITH_QT_GUI
+#include <QGuiApplication>
+#include <QScreen>
+#include <QLabel>
+#include <QImage>
+#endif
 
 namespace
 {
-    const std::string win_name = "Display Window";
-    int win_width = vision::SCREEN_WIDTH;
-    int win_height = vision::SCREEN_HEIGHT / 2;
-
-    void init_screen_show(int width = win_width, int height = win_height)
-    {
-    }
-
-
     auto time_point = mtimer::getDurationSinceEpoch();
-    void checkFPS(long long image_tag, uchar id)
+    size_t fps[2] = {0};
+    void checkFPS(int16_t &image_tag, uchar id = 0)
     {
-        static std::set<long long> frame[2];
+        if(id >= 2) return;
+        static std::set<int64_t> frame[2];
 
         auto now = mtimer::getDurationSinceEpoch();
         if ((now - time_point).count() >= 1e6)
         {
-            //printf("camera %d ---> fps: %ld\n", id, frame[id].size());
             time_point = now;
+            fps[id] = frame[id].size();
             frame[id].clear();
-        }
-        else
-            if (image_tag > 0)
-                frame[id].insert(image_tag);
-    }
-
-    size_t fps = 0;
-    void checkFPS(int16_t &image_tag)
-    {
-        static std::set<int64_t> frame;
-
-        auto now = mtimer::getDurationSinceEpoch();
-        if ((now - time_point).count() >= 1e6)
-        {
-            //printf("camera ---> fps: %ld\n", frame.size());
-            time_point = now;
-            fps = frame.size();
-            frame.clear();
             image_tag = 0;
         }
         else
             if (image_tag > 0)
-                frame.insert(image_tag);
+                frame[id].insert(image_tag);
     }
 
     void putFPS(cv::Mat& image)
@@ -77,17 +57,59 @@ namespace
 }
 
 
-FrameDisplayer::FrameDisplayer(std::string window_name/* = Display Window */)
-    : _window_width(0)
-    , _window_height(0)
-    , _window_name(window_name)
-{
 
+/* ------------------------------------------------------------------------ */
+/*                            FrameDisplayWindow                            */
+/* ------------------------------------------------------------------------ */
+
+class FrameDisplayWindow
+{
+protected:
+    FrameDisplayWindow()
+    {
+        prop[WINDOW_TYPE_NORMAL_STEREO] = {960, 270, "Normal Stereo Display"};
+        prop[WINDOW_TYPE_GOOVIS] = {1920, 1080, "Goovis Display"};
+    }
+    ~FrameDisplayWindow() {}
+public:
+    static FrameDisplayWindow* getInstance()
+    {
+        static FrameDisplayWindow window;
+        return &window;
+    }
+
+    void initial(const FrameDisplayWindowType& type,
+                 int& win_width, int& win_height, std::string& win_name){
+        win_width = prop[type].window_width;
+        win_height = prop[type].window_height;
+        win_name = prop[type].window_name;
+    }
+
+private:
+    struct WindowProp
+    {
+        uint16_t window_width;
+        uint16_t window_height;
+        std::string window_name;
+    };
+    WindowProp prop[WINDOW_TYPE_COUNT];
+};
+
+/* ------------------------------------------------------------------------ */
+/*                              FrameDisplayer                              */
+/* ------------------------------------------------------------------------ */
+
+FrameDisplayer::FrameDisplayer(const FrameDisplayWindowType& type/* = WINDOW_TYPE_NORMAL_STEREO*/)
+    : _type(type)
+    , _display_label(nullptr)
+{
+    FrameDisplayWindow::getInstance()->initial(type, _window_width, _window_height, _window_name);
 }
 
 FrameDisplayer::~FrameDisplayer()
 {
     cv::destroyWindow(_window_name);
+    DELETE_PIONTER(_display_label);
 }
 
 void FrameDisplayer::updateFrame(cv::Mat &image, uchar cam_id)
@@ -114,14 +136,15 @@ void FrameDisplayer::showFrame()
     auto start_point = mtimer::getCurrentTimePoint();
 
     int width = vision::ImageSize::width;
+    int height = vision::ImageSize::height;
     // Each image processed by GPU will convert to 4 channel !!
-    cv::Mat tmp(vision::ImageSize::height, width * 2, CV_8UC4);
+    cv::Mat tmp = cv::Mat::zeros(height, width * 2, CV_8UC4);
 
     static bool is_start = false;
-    if(!is_start)
+    if(!_display_label)
     {
         is_start = true;
-        init_screen_show();
+        initImshowWindow(width, height / 2);
     }
 
     for(uchar i = 0; i < vision::MAX_CAMERA_NUMBER; i++)
@@ -132,19 +155,19 @@ void FrameDisplayer::showFrame()
     }
     if(!tmp.empty())
     {
-        if(CMD::capture.is_take_photo){
-            saveImage(tmp);
-        }
+        if(CMD::capture.is_take_photo) saveImage(tmp);
 
         cv::Mat out;
-        cv::resize(tmp, out, cv::Size(win_width, win_height));   
+        cv::resize(tmp, out, cv::Size(_window_width, _window_height));
 
-        if(CMD::is_show_fps){
-            ::putFPS(out);
-        }
-
-        cv::imshow(win_name, out);
+        if(CMD::is_show_fps) ::putFPS(out);
+#ifdef WITH_QT_GUI
+        QImage qimg((const uchar*)out.data, out.cols, out.rows, out.step, QImage::Format_ARGB32);
+        _display_label->setPixmap(QPixmap::fromImage(qimg.copy()));
+#else
+        cv::imshow(_window_name, out);
         cv::waitKey(10);
+#endif
     }
 
     auto time = mtimer::getDurationSince(start_point);
@@ -157,13 +180,30 @@ void FrameDisplayer::showFrame()
 
 void FrameDisplayer::initImshowWindow(int width, int height)
 {
+    // Note, since OpenCV cannot show fullscreen window on Mac OS, we will display
+    // image by Qt when there is a supported Qt.
+#ifdef WITH_QT_GUI
+    _display_label = new QLabel();
+    if(_type == WINDOW_TYPE_NORMAL_STEREO){
+        QRect rect = QGuiApplication::screens()[0]->geometry();
+        _display_label->move(rect.x(), rect.y());
+        _display_label->resize(_window_width, _window_height);
+        _display_label->show();
+    }
+    else if(_type == WINDOW_TYPE_GOOVIS){
+        QRect rect = QGuiApplication::screens()[1]->geometry();
+        _display_label->move(QPoint(rect.x(), rect.y()));
+        _display_label->showFullScreen();
+    }
+#else
     cv::namedWindow(_window_name, cv::WINDOW_NORMAL);
     cv::resizeWindow(_window_name, width, height);
-    cv::moveWindow(_window_name, 0, 0);
-
-    //cv::setWindowProperty(window_name, cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-    //cv::setWindowProperty(win_name, cv::WND_PROP_AUTOSIZE, cv::WINDOW_AUTOSIZE);
+    //        cv::moveWindow(_window_name, 0, -1080);
+    //        cv::setWindowProperty(_window_name, cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    //        cv::setWindowProperty(_window_name, cv::WND_PROP_AUTOSIZE, cv::WINDOW_AUTOSIZE);
+#endif
 }
+
 
 /* Make a dir if the dir is not exist*/
 #if (defined _WIN64)

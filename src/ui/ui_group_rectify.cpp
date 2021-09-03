@@ -1,6 +1,7 @@
 #include "ui_group_rectify.h"
 #ifdef WITH_QT_GUI
 #include "ui_logger.h"
+#include "ui_global.h"
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLineEdit>
@@ -99,9 +100,7 @@ void UIGroupRectify::onChkBoxRectifySelected()
 void UIGroupRectify::onPushBtnCamParamClicked()
 {
     QString cam_params_path = QFileDialog::getOpenFileName(this, "File Dialog", "../", "Camera Parameters File(*.yml *.csv *.sr)");
-    if(cam_params_path.toStdString().empty()){
-        return;
-    }
+    UI_CHECK_LOAD_PATH(cam_params_path);
 
     _lEdit_cam_params->setText(cam_params_path);
 

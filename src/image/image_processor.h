@@ -29,6 +29,7 @@ private:
 #endif
     bool downloadImage(cv::Mat &image, uint8_t cam_id);
 
+    void testProcess(cv::Mat& image, uint8_t cam_id);
 
 private:
     struct Prop{

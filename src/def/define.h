@@ -15,27 +15,27 @@
 
 /** LOG **/
 #ifdef WITH_QT_GUI
-    #define LOG(fmt, ...){                \
-        char str[512];                      \
-        sprintf(str, fmt, ##__VA_ARGS__);   \
-        UILog(str);  \
-    }
-    #define LLOG(std_long_str){                 \
-        UILog(QString::fromStdString(std_long_str)); \
-    }
+    #define LOG(fmt, ...)                       \
+        do{                                     \
+            char str[512];                      \
+            sprintf(str, fmt, ##__VA_ARGS__);   \
+            UILog(str);                         \
+        }while(0)
+    #define LLOG(std_long_str)                 \
+        UILog(QString::fromStdString(std_long_str))
 #else
-    #define LOG(fmt, ...) {\
-        printf("[%s][%s][%d] " fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
-    }
-    #define LLOG(std_long_str){                 \
-        printf("%s\n", std_long_str.c_str());   \
-    }
+    #define LOG(fmt, ...) \
+        printf("[%s][%s][%d] " fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+
+    #define LLOG(std_long_str)                 \
+        printf("%s\n", std_long_str.c_str())
+
 #endif
 
 /** DEBUG = printf **/
-#define DEBUG(fmt, ...) {\
-    printf("[%s][%s][%d] " fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
-}
+#define DEBUG(fmt, ...) \
+    printf("[%s][%s][%d] " fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+
 
 class CameraHandle;
 class CameraParamsReader;

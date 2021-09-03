@@ -243,9 +243,6 @@ std::shared_ptr<StereoCameraParameters> CameraParamsYMLReader::getStereoCameraPa
 }
 
 
-/* ------------------------------------------------------------------------ */
-/*                          CameraParamsCSVReader                           */
-/* ------------------------------------------------------------------------ */
 
 std::vector<double> praseData(const std::string& data)
 {

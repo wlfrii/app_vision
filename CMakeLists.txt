@@ -127,12 +127,14 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/src/camera SRC_CAMERA)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/image SRC_IMAGE)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/def SRC_DEF)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ui SRC_UI)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/dm SRC_DM)
 add_executable(${PROJECT_NAME}
     ${SRC_SRC}
     ${SRC_CAMERA}
     ${SRC_IMAGE}
     ${SRC_DEF}
     ${SRC_UI}
+    ${SRC_DM}
 )
 message("CMAKE_INCLUDE_CURRENT_DIR 2:${CMAKE_INCLUDE_CURRENT_DIR}")
 
@@ -142,10 +144,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
     PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/camera>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/image>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/def>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/ui>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
 
 # Link external library

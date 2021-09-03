@@ -113,7 +113,7 @@ void VisionManager::handleImage(cv::Mat &image, uint8_t id)
 void VisionManager::showImage()
 {
     if(!_image_displayer){
-        _image_displayer = std::make_shared<FrameDisplayer>("Display Window");
+        _image_displayer = std::make_shared<FrameDisplayer>(WINDOW_TYPE_GOOVIS);
     }
 
     for(int i = 0; i < vision::MAX_CAMERA_NUMBER; i++){
