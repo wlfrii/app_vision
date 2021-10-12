@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 
-
 namespace {
 
 void checkCompileErrors(unsigned int shader, std::string type)

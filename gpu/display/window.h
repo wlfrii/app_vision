@@ -15,11 +15,8 @@ public:
     ~Window();
 
     bool initialize();
-
-    GLFWwindow* get() const
-    {
-        return _window;
-    }
+    void refresh();
+    void release();
 
 private:
     void initGLFW();

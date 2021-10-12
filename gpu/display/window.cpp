@@ -4,24 +4,13 @@
  */
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../../util/debug.h"
+#include "../util.h"
 
 namespace {
-
-inline bool initGLAD()
-{
-    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-        DEBUG("Failed to initialize GLAD.\n");
-        return false;
+    void frameBufferSizeCallback(GLFWwindow*, int width, int height)
+    {
+        glViewport(0, 0, width, height);
     }
-    return true;
-}
-
-void frameBufferSizeCallback(GLFWwindow*, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
 }
 
 GPU_NS_BEGIN
@@ -36,7 +25,7 @@ Window::Window(uint16_t width, uint16_t height)
 
 Window::~Window()
 {
-    glfwTerminate();
+    release();
 }
 
 bool Window::initialize()
@@ -44,9 +33,23 @@ bool Window::initialize()
     initGLFW();
     if(!createGLFWwindow()) return false;
 
-    if(!::initGLAD()) return false;
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        DEBUG("Failed to initialize GLAD.\n");
+        return false;
+    }
 
     return true;
+}
+
+void Window::refresh()
+{
+    glfwSwapBuffers(_window);
+    glfwPollEvents();
+}
+
+void Window::release()
+{
+    glfwTerminate();
 }
 
 // --- PRIVATE ---
@@ -77,9 +80,6 @@ bool Window::createGLFWwindow()
     }
     else {
         glfwMakeContextCurrent(_window);
-
-        /* Set a callback function to tell GL update the view port
-        when the size of the window is changed. */
         glfwSetFramebufferSizeCallback(_window, ::frameBufferSizeCallback);
     }
     return true;
