@@ -90,6 +90,7 @@ void Displayer::render()
         DEBUG("The dispalyer was not initialized\n");
         return;
     }
+    _window->activate();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -113,5 +114,9 @@ void Displayer::render()
     _window->refresh();
 }
 
+bool Displayer::shouldClose()
+{
+    return _window->shouldClose();
+}
 
 GPU_NS_END

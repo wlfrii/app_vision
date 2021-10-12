@@ -1,8 +1,8 @@
 #ifndef GPU_DISPLAYER_H_LF
 #define GPU_DISPLAYER_H_LF
 #include <cstdint>
-#include "../util.h"
-GPU_NS_BEGIN
+
+namespace gpu{
 
 class Window;
 class Shader;
@@ -19,12 +19,40 @@ public:
     Displayer(const Displayer &) = delete;
     ~Displayer();
 
+    /**
+     * @brief Initialize displayer for showing image.
+     * 
+     * @return true 
+     * @return false 
+     */
     bool initialize();
 
+    /**
+     * @brief Update image buffer.
+     * 
+     * @param data The image data.
+     * @param im_w The width of the image.
+     * @param im_h The height of the image.
+     * @param im_c The channels of the image.
+     * @param is_right To specify left or right image.
+     */
     void updateImage(uint8_t* data, uint16_t im_w, uint16_t im_h, uint8_t im_c,
-                     bool is_right);
+                     bool is_right = false);
 
+    /**
+     * @brief Render the input image data.
+     * 
+     */
     void render();
+
+    /**
+     * @brief Return the window close-status.
+     * This is controled by 'ESCAPE' button.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool shouldClose();
 
 private:
     uint16_t    _width;
@@ -40,5 +68,5 @@ private:
     bool        _has_init;
 };
 
-GPU_NS_END
+} // namespace::gpu
 #endif // GPU_DISPLAYER_H_LF

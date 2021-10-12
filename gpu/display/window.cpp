@@ -41,10 +41,21 @@ bool Window::initialize()
     return true;
 }
 
+void Window::activate()
+{
+    glfwMakeContextCurrent(_window);
+    processKeyboard();
+}
+
 void Window::refresh()
 {
     glfwSwapBuffers(_window);
     glfwPollEvents();
+}
+
+bool Window::shouldClose()
+{
+    return glfwWindowShouldClose(_window);
 }
 
 void Window::release()
@@ -84,6 +95,13 @@ bool Window::createGLFWwindow()
     }
     return true;
 }
+
+void Window::processKeyboard()
+{
+    if(glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(_window, true);
+}
+
 
 void Window::toFullScreen()
 {

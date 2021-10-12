@@ -8,6 +8,9 @@ message(STATUS "Project: ${PROJECT_NAME}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE "RELEASE")
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     include_directories(
             ${PROJECT_SOURCE_DIR}/lib
@@ -42,5 +45,12 @@ target_link_libraries(${PROJECT_NAME}
 file(COPY
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/imtexture.vs
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/imtexture.fs
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+    DESTINATION ${CMAKE_BINARY_DIR}
 )
+file(COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/display/displayer.h
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/display/
+)
+
+# For testing this library
+add_subdirectory(test)

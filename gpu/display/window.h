@@ -14,13 +14,34 @@ public:
     Window(uint16_t width, uint16_t height);
     ~Window();
 
+    /**
+     * @brief Initialize GL Window.
+     * 
+     * @return true 
+     * @return false 
+     */
     bool initialize();
+
+    /**
+     * @brief Activate current window.
+     * This is useful when there are more than one GL Window exist.
+     */
+    void activate();
+
+    /**
+     * @brief Swap buffers
+     * 
+     */
     void refresh();
+
+    bool shouldClose();
     void release();
 
 private:
     void initGLFW();
     bool createGLFWwindow();
+
+    void processKeyboard();
 
     void toFullScreen();
 
