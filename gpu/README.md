@@ -1,6 +1,5 @@
 # lib vision gpu
 
----
 ## Requirements
 
 This module requires GLFW, GLAD, and GLM.
@@ -17,7 +16,6 @@ The former way is recommanded. Accessing the website,
 
 The GLAD and GLM have been included in the external forder.
 
----
 ## Platform
 
 This module was created and compiled on __Mac OS__.
