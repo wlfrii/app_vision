@@ -24,3 +24,8 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
 )
 
+file(COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/L_test.bmp
+    ${CMAKE_CURRENT_SOURCE_DIR}/R_test.bmp
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
