@@ -12,10 +12,9 @@ struct VAVBEBO;
 class Displayer
 {
 public:
-    enum DisplayMode{
-        DISPLAY_2D,
-        DISPLAY_3D
-    };
+    using DisplayMode = bool;
+    static constexpr DisplayMode DISPLAY_2D = 0;
+    static constexpr DisplayMode DISPLAY_3D = 1;
     Displayer(uint16_t width, uint16_t height, DisplayMode mode = DISPLAY_3D);
     Displayer(const Displayer &) = delete;
     ~Displayer();
