@@ -1,5 +1,4 @@
-#include "../def/micro.h"
-#if LINUX
+#if _linux_
 #include "v4l2_capture.h"
 #include "mjpeg2jpeg.h"
 #include <poll.h>
@@ -546,4 +545,4 @@ bool V4L2Capture::tryIoctl(unsigned long ioctl_code, void *param, bool fail_if_b
     return true;
 }
 
-#endif
+#endif // _linux_

@@ -1,7 +1,6 @@
-#include "../def/micro.h"
-#if LINUX
 #ifndef V4L2_CAPTURE_H
 #define V4L2_CAPTURE_H
+#if _linux_
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -155,5 +154,5 @@ private:
 
     std::mutex      mtx;
 };
+#endif  // _linux_
 #endif  // V4L2_CAPTURE_H
-#endif  // LINUX
