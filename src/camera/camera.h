@@ -1,5 +1,5 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef CAMERA_H_LF
+#define CAMERA_H_LF
 #include <thread>
 #include <opencv2/opencv.hpp>
 
@@ -9,11 +9,14 @@ class FrameDisplayer;
 class Camera
 {
 public:
-    Camera(uchar usb_id, uchar cam_id);
+    Camera(uchar cam_id, uchar usb_id);
+    Camera(uchar cam_id, const std::string& video_path);
 
     ~Camera();
 
 private:
+    void init();
+
     void run [[noreturn]] ();
 
 
@@ -24,4 +27,4 @@ private:
     FrameDisplayer* _frame_displayer;
 };
 
-#endif // CAMERA_H
+#endif // CAMERA_H_LF

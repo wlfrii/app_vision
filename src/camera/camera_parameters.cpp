@@ -1,5 +1,5 @@
 #include "camera_parameters.h"
-#include "../def/define.h"
+#include "../util/define.h"
 #include <fstream>
 #include <vector>
 #include <string>
