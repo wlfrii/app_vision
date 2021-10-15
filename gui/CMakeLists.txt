@@ -26,8 +26,10 @@ find_package(Qt6 COMPONENTS Widgets Core Gui REQUIRED)
 message(STATUS "Qt6 directory: ${Qt6_DIR}")
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ui SRC_UI)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/display SRC_DISPLAY)
 add_library(${PROJECT_NAME} STATIC
     ${SRC_UI}
+    ${SRC_DISPLAY}
 )
 
 target_include_directories(${PROJECT_NAME}

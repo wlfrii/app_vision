@@ -2,6 +2,8 @@
 #define GUI_VISION_UI_H_LF
 #include <cstdint>
 #include <string>
+class QImage;
+
 
 namespace gui{
 typedef void (*Callback)(uint8_t, void*);
@@ -41,16 +43,16 @@ enum EventType
     EVENT_LOAD_RIGHT_VIDEO,
     EVENT_LOAD_STEREO_VIDEO,
 
-    EVENT_CLOSE_DISPLAY,
-    EVENT_PAUSE_DISPLAY,
-    EVENT_GOON_DISPLAY,
-
-    EVENT_RECTIFY_STATUS,
     EVENT_LOAD_CAM_PARAMS,
+    EVENT_RECTIFY_STATUS,
 
     EVENT_CAMERA_STATUS,
     EVENT_CAM_FPS_STATUS,
     EVENT_CAPTURE,
+
+    EVENT_CLOSE_DISPLAY,
+    EVENT_PAUSE_DISPLAY,
+    EVENT_GOON_DISPLAY,
 
     EVENT_ENHANCE_STATUS
 };
@@ -69,6 +71,31 @@ struct CaptureInfo {
 };
 extern CaptureInfo captureinfo;
 
+
+class Window;
+/**
+ * @brief The Displayer class is designed for display image by Qt.
+ */
+class Displayer
+{
+public:
+    enum DisplayMode{
+        DISPLAY_2D,
+        DISPLAY_3D
+    };
+    Displayer(uint16_t win_width, uint16_t win_height, DisplayMode mode);
+    ~Displayer();
+
+    void updateImage(uint8_t* data, uint16_t im_w, uint16_t im_h, uint8_t im_c,
+                     bool is_right = false);
+
+    void show();
+    void setFullScreen();
+private:
+    Window* _window;
+    QImage* _images[2];
+    DisplayMode _mode;
+};
 
 } // namespace::gui
 
