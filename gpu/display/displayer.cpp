@@ -2,6 +2,8 @@
 #include "window.h"
 #include "shader.h"
 #include "vavbebo.h"
+#include <sstream>
+
 GPU_NS_BEGIN
 
 Displayer::Displayer(uint16_t width, uint16_t height, DisplayMode mode)
@@ -11,6 +13,8 @@ Displayer::Displayer(uint16_t width, uint16_t height, DisplayMode mode)
     , _im_vavbebo(nullptr)
     , _mode(mode)
     , _has_init(false)
+    , _save_name("")
+    , _save_path("./capture")
 {
 
 }
@@ -114,9 +118,51 @@ void Displayer::render()
     _window->refresh();
 }
 
+
 bool Displayer::shouldClose()
 {
     return _window->shouldClose();
+}
+
+
+void Displayer::setSavePath(const std::string& path)
+{
+    _save_path = path;
+}
+
+
+void Displayer::saveTexture(const std::string& filename/* = ""*/)
+{
+    _save_name = filename;
+    // To be finished
+    std::stringstream ss;
+    if(_save_name.empty()){
+        ss << util::getCurrentTimeStr();
+    }
+    ss << ".bmp";
+    std::string name = ss.str();
+
+    util::MAKE_DIR(_save_path);
+    if(_mode == DISPLAY_3D){
+        auto left_folder = _save_path + "/left/";
+        auto right_folder = _save_path + "/right/";
+        util::MAKE_DIR(left_folder);
+        util::MAKE_DIR(right_folder);
+
+        auto L_path = left_folder + "L_" + name;
+        auto R_path = right_folder + "R_" + name;
+        //cv::imwrite(L_path, _images[0]);
+        //cv::imwrite(R_path, _images[1]);
+
+        LOG("Images [L_%s] and [R_%s] has been saved in \"%s\".",
+            name.c_str(), name.c_str(), _save_path.c_str());
+    }
+    else{
+        auto path = _save_path + ss.str();
+        //cv::imwrite(path, _images[0]);
+
+        LOG("Image [%s] has been saved in \"%s\".", name.c_str(), _save_path.c_str());
+    }
 }
 
 GPU_NS_END

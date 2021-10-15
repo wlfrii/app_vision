@@ -1,6 +1,7 @@
 #ifndef GPU_DISPLAYER_H_LF
 #define GPU_DISPLAYER_H_LF
 #include <cstdint>
+#include <string>
 
 namespace gpu{
 
@@ -54,6 +55,9 @@ public:
      */
     bool shouldClose();
 
+    void setSavePath(const std::string& path);
+    void saveTexture(const std::string& filename = "");
+
 private:
     uint16_t    _width;
     uint16_t    _height;
@@ -66,6 +70,10 @@ private:
     unsigned int _texture[2];
 
     bool        _has_init;
+
+    // For save texture
+    std::string _save_name;
+    std::string _save_path;
 };
 
 } // namespace::gpu
