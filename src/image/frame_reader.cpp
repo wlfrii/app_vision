@@ -1,10 +1,9 @@
 #include "frame_reader.h"
-//#include <libutility/timer/mtimer.h>
-#include "../def/mtimer.h"
-#include "../def/ptr_define.h"
-#include "../def/define.h"
-#if LINUX
-#include "unix/v4l2_capture.h"
+#include "../util/mtimer.h"
+#include "../util/util.h"
+#include "../util/define.h"
+#if _linux_
+#include "../linux/v4l2_capture.h"
 #endif
 
 namespace

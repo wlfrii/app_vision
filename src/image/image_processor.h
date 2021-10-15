@@ -4,10 +4,10 @@
 #include <atomic>
 #include <memory>
 //#include <libutility/buffer/ring_buffer.h>
-#include "../def/ring_buffer.h"
+#include "../util/ring_buffer.h"
 #include <array>
 #include "../camera/map_calculator.h"
-#include "../def/define.h"
+#include "../util/define.h"
 
 class ImageProcessor
 {

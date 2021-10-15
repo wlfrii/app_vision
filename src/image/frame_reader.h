@@ -1,17 +1,15 @@
 #ifndef IMAGE_READER_H_LF
 #define IMAGE_READER_H_LF
 #include <opencv2/opencv.hpp>
-//#include <thread>
 #include <string>
-#include "../def/define.h"
-
 
 #ifdef __linux__
 class V4L2Capture;
 #endif
 
-/** @brief  the base class of monocular or binocular image reader
-*/
+/**
+ * @brief  the base class of monocular or binocular image reader
+ */
 class FrameReader
 {
 public:
@@ -31,8 +29,8 @@ public:
     ~FrameReader();
 
     /**
-    * @brief  Get current frame if there is one.
-    */
+     * @brief  Get current frame if there is one.
+     */
     bool getFrame(cv::Mat & frame);
 
 private:

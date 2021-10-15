@@ -13,7 +13,7 @@
  */
 #ifndef VISION_MANAGER_H_LF
 #define VISION_MANAGER_H_LF
-#include "def/define.h"
+#include "util/define.h"
 #include <thread>
 #include <string>
 #include <memory>
@@ -25,23 +25,6 @@ class FrameDisplayer;
 
 class VisionManager
 {
-    class CameraHandle
-    {
-    protected:
-        CameraHandle();
-        ~CameraHandle();
-    public:
-        static CameraHandle* createInstance();
-        static void releaseInstance(CameraHandle* handle);
-
-        void openCamera();
-    private:
-        void initCamera();
-
-        Camera* _cameras[vision::MAX_CAMERA_NUMBER];
-    };
-
-
 protected:
     VisionManager();
     virtual ~VisionManager();
@@ -49,30 +32,39 @@ protected:
 public:
     static VisionManager* getInstance();
 
+
     bool loadCamParams(std::string path);
 
-    void openCamera();
+    /**
+     * @brief Open binocular camera
+     * @param l_usb_id
+     * @param r_usb_id
+     */
+    void openCamera(uint8_t l_usb_id = 0, uint8_t r_usb_id = 1);
+
+    /**
+     * @brief Close camera
+     */
     void closeCamera();
 
-    // For handle image window
+    /**
+     * @brief Load video and display it.
+     * @param video_path
+     * @param id
+     */
+    void handleVideo(std::string video_path, uint8_t id);
+
+    // Handle image window
     void handleImage(cv::Mat& image, uint8_t id);
     void showImage();
     void closeImageWindow();
 
-    // For handle video window
-    bool handleVideo(std::string video_path);
-    bool showVideo();
-    void closeVideoWindow();
-
 private:
-    // For image window
+    Camera* _cameras[vision::MAX_CAMERA_NUMBER];
+
     cv::Mat _images[vision::MAX_CAMERA_NUMBER];
     cv::Mat _processed_images[vision::MAX_CAMERA_NUMBER];
     std::shared_ptr<FrameDisplayer> _image_displayer;
-
-    // For video window
-    cv::VideoCapture _video_capture;
-
 };
 
 #endif // VISION_MANAGER_H_LF

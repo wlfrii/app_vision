@@ -1,5 +1,5 @@
 #include "map_calculator.h"
-#include "../def/define.h"
+#include "../util/define.h"
 
 
 MapCalculator::MapCalculator(std::shared_ptr<CameraParameters> cam_params)

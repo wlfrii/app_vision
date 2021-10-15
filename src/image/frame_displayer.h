@@ -1,19 +1,20 @@
+/**
+ * To display the image, OpenGL is the prefered tool since its efficiency.
+ * Thus, This module has change the display method from OpenCV to OpenGL,
+ * and GLFW and GLAD is required in this project.
+ */
 #ifndef FRAME_DISPLAYER_H_LF
 #define FRAME_DISPLAYER_H_LF
-#include <array>
 #include <string>
-#include <vector>
-#include "../def/define.h"
+#include <opencv2/opencv.hpp>
 
-#ifdef WITH_QT_GUI
-class QLabel;
+#ifdef WITH_GL
+namespace gpu{ class Displayer; }
+#elif WITH_QT_GUI
+namespace gui{ class Displayer; }
+#else
+class Displayer;
 #endif
-
-enum FrameDisplayWindowType{
-    WINDOW_TYPE_NORMAL_STEREO,  //!< The window wil be initialized as 1920 x 540 resolution.
-    WINDOW_TYPE_GOOVIS,         //!< For displaying stereo vision in goovis.
-    WINDOW_TYPE_COUNT
-};
 
 /**
  * @brief This class is designed to display the binocular view.
@@ -23,15 +24,21 @@ enum FrameDisplayWindowType{
 class FrameDisplayer
 {
 public:
-    FrameDisplayer(const FrameDisplayWindowType& type = WINDOW_TYPE_NORMAL_STEREO);
+    enum DisplayMode{
+        DISPLAY_2D = 0,
+        DISPLAY_3D = 1
+    };
+
+    FrameDisplayer(uint16_t width, uint16_t height, DisplayMode type = DISPLAY_3D);
     ~FrameDisplayer();
 
     /**
      * @brief The interface called by FrameReader, to update frame.
-     * @param cam_id  The id of the camera.
+     * @param cam_id  The id of the camera. If Display_2D mode is set, the
+     * cam_id is not required, and is useless even is set.
      * @param image  The new frame read by FrameReader.
      */
-    void updateFrame(cv::Mat &image, uchar cam_id);
+    void updateFrame(cv::Mat &image, uchar cam_id = 0);
 
     /**
      * @brief The interface called by Main Thread to show the frame.
@@ -39,22 +46,17 @@ public:
     void showFrame();
 
 private:
-    void initImshowWindow(int width, int height);
     void saveImage(const cv::Mat &image);
 
-private:
-    std::array<cv::Mat, vision::MAX_CAMERA_NUMBER> _images;
-
-    FrameDisplayWindowType _type;
-
-    int         _window_width;
-    int         _window_height;
-    std::string _window_name;
-    static std::vector<std::string> _window_names;
-
-#ifdef WITH_QT_GUI
-    QLabel* _display_label;
+#ifdef WITH_GL
+    gpu::Displayer* _displayer;
+#elif WITH_QT_GUI
+    gui::Displayer* _displayer;
+#else
+    Displayer*      _displayer;
 #endif
+
+    bool _is_show_fps;
 };
 
 #endif // FRAME_DISPLAYER_H

@@ -19,15 +19,6 @@ set(CMAKE_BUILD_TYPE "Release")
 # --------------------------------------------------------------------
 #                  Configure for different platform
 # --------------------------------------------------------------------
-# @WITH_CUDA
-# If use CUDA, then define macro "WITH_CUDA", and the code running 
-# on GPU will be compiled.
-option(WITH_CUDA "select to us GPU" OFF)
-message(STATUS "WITH_CUDA: " ${WITH_CUDA})
-if(WITH_CUDA)
-    add_definitions(-DWITH_CUDA)
-endif(WITH_CUDA)
-
 # @Platform
 # Checke the current operation system, and then make configuration.
 # @Windows
@@ -42,10 +33,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/x64/lib)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/x64/bin)
     # Set OpenCV path depend on CUDA
+    set(OpenCV_FOLDER "D:/MyProjects/include")
     if(WITH_CUDA)
-        set(OpenCV_DIR "D:/MyProjects/include/opencv_cmake/install/x64/vc15/lib")
+        set(OpenCV_DIR ${OpenCV_FOLDER}/opencv_cmake/install/x64/vc15/lib)
     else()
-        set(OpenCV_DIR "D:/MyProjects/include/opencv/build/x64/vc15/lib")
+        set(OpenCV_DIR ${OpenCV_FOLDER}/opencv/build/x64/vc15/lib)
     endif(WITH_CUDA)
 
     add_definitions(-DUNICODE -D_UNICODE)
@@ -53,7 +45,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 # @Linux
 elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     message(STATUS "Platform: Linux")
-
 # @Mac OS
 elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     message(STATUS "Platform: Mac OS")
@@ -73,43 +64,6 @@ else(${OpenCV_FOUND})
     message(WARNING "Cannot found OpenCV.")
 endif(${OpenCV_FOUND})
 
-# @GLFW
-# The OpenGL library is used for visualization
-option(WITH_GL "select to use OpenGL" OFF)
-message(STATUS "WITH_GL: ${WITH_GL}")
-if(WITH_GL)
-    if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-        include_directories(
-            ${PROJECT_SOURCE_DIR}/lib
-        )
-    else()
-        find_package(glfw3 REQUIRED)
-    endif()
-endif(WITH_GL)
-
-# @Qt
-# If use Qt GUI, then define macro "WITH_QT_GUI", and the code for 
-# construting an Qt GUI will be compiled.
-# 
-option(WITH_QT_GUI "select to use Qt GUI" ON)
-message(STATUS "WITH_QT_GUI: ${WITH_QT_GUI}")
-if(WITH_QT_GUI)
-    message(STATUS "  Inculde Qt")
-    add_definitions(-DWITH_QT_GUI)
-    # set moc
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-    #set(CMAKE_AUTOUIC ON)
-    # since the built files will be stored in include directory,
-    # current path should be included
-    if(CMAKE_VERSION VERSION_LESS "3.7.0")
-        set(CMAKE_INCLUDE_CURRENT_DIR ON)
-    endif()
-    message("CMAKE_INCLUDE_CURRENT_DIR: ${CMAKE_INCLUDE_CURRENT_DIR}")
-    # include Qt
-    find_package(Qt6 COMPONENTS Widgets Core Gui REQUIRED)
-    message(STATUS "Qt6 directory: ${Qt6_DIR}")
-endif(WITH_QT_GUI)
 
 # @lib_instrument
 set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../buildtarget/)
@@ -125,18 +79,17 @@ find_package(EIGEN3 REQUIRED)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRC_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/camera SRC_CAMERA)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/image SRC_IMAGE)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/def SRC_DEF)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/ui SRC_UI)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/dm SRC_DM)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/util SRC_UTIL)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/linux SRC_LINUX)
 add_executable(${PROJECT_NAME}
     ${SRC_SRC}
     ${SRC_CAMERA}
     ${SRC_IMAGE}
-    ${SRC_DEF}
-    ${SRC_UI}
-    ${SRC_DM}
+    ${SRC_UTIL}
+    ${SRC_LINUX}
 )
-message("CMAKE_INCLUDE_CURRENT_DIR 2:${CMAKE_INCLUDE_CURRENT_DIR}")
+message(${GLAD_PATH}/src)
+
 
 ## ------------- Include the Header files ------------- ##
 target_include_directories(${PROJECT_NAME}
@@ -152,53 +105,39 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${lib_instrument_LIBRARIES}
 )
+
+
+# --------------------------------------------------------------------
+#                   Optionally Create targets
+# --------------------------------------------------------------------
+# @WITH_CUDA
+# If use CUDA, then define macro "WITH_CUDA", and the code running
+# on GPU will be compiled.
+option(WITH_CUDA "select to us GPU" OFF)
+message(STATUS "WITH_CUDA: " ${WITH_CUDA})
+if(WITH_CUDA)
+    add_definitions(-DWITH_CUDA)
+endif(WITH_CUDA)
+
+
+# @OpenGL
+# The OpenGL library is used for visualization
+option(WITH_GL "select to use OpenGL" ON)
+message(STATUS "WITH_GL: ${WITH_GL}")
 if(WITH_GL)
-    target_link_libraries(${PROJECT_NAME}
-        glfw3
-    )
+    message(STATUS "  Inculde OpenGL")
+    add_definitions(-DWITH_GL)
+    add_subdirectory(gpu)
 endif(WITH_GL)
+
+
+# @Qt
+# If use Qt GUI, then define macro "WITH_QT_GUI", and the code for 
+# construting an Qt GUI will be compiled.
+option(WITH_QT_GUI "select to use Qt GUI" ON)
+message(STATUS "WITH_QT_GUI: ${WITH_QT_GUI}")
 if(WITH_QT_GUI)
-    #message("Link Qt libraries")
-    target_link_libraries(${PROJECT_NAME}
-        Qt6::Widgets Qt6::Core Qt6::Gui
-    )
+    message(STATUS "  Inculde Qt")
+    add_definitions(-DWITH_QT_GUI)
+    add_subdirectory(gui)
 endif(WITH_QT_GUI)
-
-
-
-
-# Set the output path where your program will be created
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build)
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/lib)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build)
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
-
-# # Include the Header files
-# include_directories(
-#     ${CMAKE_SOURCE_DIR}/lib_vision_gpu/src
-# )
-# include_directories(${CUDA_INCLUDE_DIRS})
-# # Include the libraries
-# link_directories(
-#     ${CMAKE_BINARY_DIR}/lib/lib_vision_gpu
-# )
-
-# aux_source_directory(./src SRC_SRC)
-# aux_source_directory(./src/def DEF_SRC)
-# aux_source_directory(./src/unix UNIX_SRC)
-
-# # message("the src is ${UNIX_SRC}" )
-
-# add_executable(${PROJECT_NAME}
-#     ${SRC_SRC}
-#     ${DEF_SRC}
-#     ${UNIX_SRC}
-# )
-
-# # link external library
-# target_link_libraries(${PROJECT_NAME}
-#     turbojpeg
-#     lib_vision_gpu
-# )

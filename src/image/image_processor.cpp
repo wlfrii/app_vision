@@ -1,9 +1,8 @@
 #include "image_processor.h"
 #include "../camera/camera_parameters.h"
 #include "../camera/map_calculator.h"
-#include "../def/ptr_define.h"
-#include "../def/cmd.h"
-#include "../def/define.h"
+#include "../util/util.h"
+#include "../util/define.h"
 #include <memory>
 #ifdef WITH_CUDA
 #include <libvisiongpu/gpu_algorithm_pipeline_manager.h>
@@ -57,7 +56,7 @@ bool ImageProcessor::processImage(const cv::Mat &input, cv::Mat &output, uint8_t
 
 void ImageProcessor::processImageOnCPU(const cv::Mat& image, uint8_t cam_id)
 {
-    if (props[cam_id]->map_calculator == nullptr || !CMD::is_rectify) {
+    if (props[cam_id]->map_calculator == nullptr /*|| !is_rectify*/) {
 		cv::cvtColor(image, props[cam_id]->processed_image, cv::COLOR_BGR2BGRA);
     }
     else {
@@ -66,7 +65,7 @@ void ImageProcessor::processImageOnCPU(const cv::Mat& image, uint8_t cam_id)
         const auto& mapy = props[cam_id]->map_calculator->getCPUMapy();
         cv::remap(image, temp, mapx, mapy, cv::INTER_LINEAR, cv::BORDER_CONSTANT, 0);
 
-        testProcess(temp, cam_id);
+        //testProcess(temp, cam_id);
 
         cv::cvtColor(temp, props[cam_id]->processed_image, cv::COLOR_BGR2BGRA);
     }

@@ -3,14 +3,14 @@
 //#include <libutility/timer/mtimer.h>
 #include <iostream>
 #include <atomic>
-#include "../def/mtimer.h"
+#include "../util/mtimer.h"
 
 namespace
 {
 	std::string getWriteFilename(const std::string &filename)
 	{
 		auto pos = filename.find_last_of('.');
-		auto time_str = mtimer::getCurrentTimeStr();
+        auto time_str = util::mtimer::getCurrentTimeStr();
 		std::string res;
 		res = filename.substr(0, pos) + "_p" + time_str + ".avi"; // filename.substr(pos, filename.size() - 1);
 
@@ -57,9 +57,9 @@ bool VideoProcessor::processVideo(const std::string &filename, bool is_write/* =
 	}
 
 	// Start process
-	auto start_point = mtimer::getDurationSinceEpoch();
+    auto start_point = util::mtimer::getDurationSinceEpoch();
 	std::cout << "\nStart processing...\n";
-	std::cout << "Current time point: " << mtimer::getCurrentTimeStr() << std::endl;
+    std::cout << "Current time point: " << util::mtimer::getCurrentTimeStr() << std::endl;
 	std::cout << "The processed filename is: " << filename << std::endl;
 	if(is_write)
 		std::cout << "The saved filename: " << write_filename << std::endl;
@@ -99,8 +99,8 @@ bool VideoProcessor::processVideo(const std::string &filename, bool is_write/* =
 		}*/
 	}
 	std::cout << "Processing down...\n";
-	std::cout << "Current time point: " << mtimer::getCurrentTimeStr() << ", ";
-	auto time = mtimer::getDurationSince(start_point, mtimer::SECOND);
+    std::cout << "Current time point: " << util::mtimer::getCurrentTimeStr() << ", ";
+    auto time = util::mtimer::getDurationSince(start_point, util::mtimer::SECOND);
 	std::cout << time << " seconds elapsed.\n";
 
 	capture.release();
