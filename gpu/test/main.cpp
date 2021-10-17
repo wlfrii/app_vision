@@ -25,7 +25,7 @@ int main()
     while(!displayer_3d.shouldClose() && !displayer_2d.shouldClose())
     {
         displayer_3d.render();
-        displayer_2d.render();
+        //displayer_2d.render();
     }
 
     return 0;

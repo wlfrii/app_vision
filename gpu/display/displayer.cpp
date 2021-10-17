@@ -16,7 +16,9 @@ Displayer::Displayer(uint16_t width, uint16_t height, DisplayMode mode)
     , _save_name("")
     , _save_path("./capture")
 {
-
+    _texture[0] = 0;
+    _texture[1] = 0;
+    DEBUG("Display mode %d\n", _mode);
 }
 
 
@@ -107,7 +109,7 @@ void Displayer::render()
     glBindTexture(GL_TEXTURE_2D, _texture[0]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    if(_mode == DISPLAY_3D){
+    if(_mode == DISPLAY_3D && _texture[1] != 0){
         glViewport(_width, 0, _width, _height*2);
         _im_shader->use();
         _im_vavbebo->bindVertexArray();

@@ -44,6 +44,7 @@ bool Window::initialize()
 void Window::activate()
 {
     glfwMakeContextCurrent(_window);
+    glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
     processKeyboard();
 }
 
@@ -83,16 +84,16 @@ bool Window::createGLFWwindow()
 {
     _window = glfwCreateWindow(_win_width, _win_height,
                                           _win_name.c_str(), nullptr, nullptr);
-
     if(_window == nullptr){
         DEBUG("Failed to creat GLFW window.\n");
         glfwTerminate();
         return false;
     }
-    else {
-        glfwMakeContextCurrent(_window);
-        glfwSetFramebufferSizeCallback(_window, ::frameBufferSizeCallback);
-    }
+    
+    glfwMakeContextCurrent(_window);
+    glfwSetFramebufferSizeCallback(_window, ::frameBufferSizeCallback);
+    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+
     return true;
 }
 
