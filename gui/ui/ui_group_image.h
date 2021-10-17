@@ -1,11 +1,11 @@
 #ifndef UI_GROUP_IMAGE_H_LF
 #define UI_GROUP_IMAGE_H_LF
 #include "ui_base.h"
-#include <string>
 
 class QGroupBox;
 class QCheckBox;
 class QPushButton;
+class QString;
 
 GUI_NS_BEGIN
 
@@ -47,7 +47,7 @@ private:
     QPushButton		*_pbtn_close;
     QPushButton     *_pbtn_pause;
 
-    std::string     _data_path;
+    QString          _data_path;
 };
 
 GUI_NS_END

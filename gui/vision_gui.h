@@ -7,6 +7,7 @@ class QImage;
 
 namespace gui{
 typedef void (*Callback)(uint8_t, void*);
+typedef void (*CallbackDisplayer)();
 
 /**
  * @brief Start the GUI (This interface should be called in the main thread).
@@ -71,31 +72,6 @@ struct CaptureInfo {
 };
 extern CaptureInfo captureinfo;
 
-
-class Window;
-/**
- * @brief The Displayer class is designed for display image by Qt.
- */
-class Displayer
-{
-public:
-    enum DisplayMode{
-        DISPLAY_2D,
-        DISPLAY_3D
-    };
-    Displayer(uint16_t win_width, uint16_t win_height, DisplayMode mode);
-    ~Displayer();
-
-    void updateImage(uint8_t* data, uint16_t im_w, uint16_t im_h, uint8_t im_c,
-                     bool is_right = false);
-
-    void show();
-    void setFullScreen();
-private:
-    Window* _window;
-    QImage* _images[2];
-    DisplayMode _mode;
-};
 
 } // namespace::gui
 

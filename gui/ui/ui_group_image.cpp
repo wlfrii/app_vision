@@ -4,10 +4,18 @@
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QPushButton>
+#include <QImage>
+#include <QTimer>
 #include "ui_logger.h"
 #include "ui_global.h"
+#include "../display/displayer.h"
+
+#include <QLabel>
 
 GUI_NS_BEGIN
+
+extern Displayer* gui_displayer;
+extern QTimer gui_display_timer;
 
 UIGroupImage::UIGroupImage()
     : _data_path("")
@@ -102,60 +110,87 @@ QWidget* UIGroupImage::create()
 }
 
 
-#define LOAD(std_path, type, token)                                     \
+#define LOAD(path, type, token)                                         \
     QString filter = QString(#type) == "image" ?                        \
         "Image Files(*bmp *png *jpg)" : "Video Files(*avi *mp4)";       \
-    QString path = QString::fromStdString(std_path);                    \
     path = QFileDialog::getOpenFileName(this, tr("File dialog"),        \
         path.isEmpty() ? "../" : path, filter);                         \
     if(!path.isEmpty()){                                                \
-        std_path = path.toStdString();                                  \
         QString qstr = "Load "#token" "#type" from \""+path+"\".";      \
         UILog(qstr);                                                    \
     }
 
 
+
 void UIGroupImage::onPushBtnLoadLeftImageClicked()
 {
     LOAD(_data_path, image, left);
-    CALLBACK(EVENT_LOAD_LEFT_IMAGE, static_cast<void*>(&_data_path));
+    QImage image;
+    if(!image.load(_data_path)){
+        UILog("Failed load image.\n");
+        return;
+    }
+    gui_displayer->updateImage(image, false);
+    START_DISPLAY();
 }
 
 void UIGroupImage::onPushBtnLoadRightImageClicked()
 {
     LOAD(_data_path, image, right);
-    CALLBACK(EVENT_LOAD_RIGHT_IMAGE, static_cast<void*>(&_data_path));
+    QImage image;
+    if(!image.load(_data_path)){
+        UILog("Failed load image.\n");
+        return;
+    }
+    gui_displayer->updateImage(image, true);
+    START_DISPLAY();
 }
 
 void UIGroupImage::onPushBtnLoadStereoImageClicked()
 {
     LOAD(_data_path, image, stereo);
-    CALLBACK(EVENT_LOAD_STEREO_IMAGE, static_cast<void*>(&_data_path));
+    QImage image;
+    if(!image.load(_data_path)){
+        UILog("Failed load image.\n");
+        return;
+    }
+    QImage left, right;
+    auto rect = image.rect();
+    auto w = rect.width() / 2;
+    left = image.copy(rect.x(), rect.y(), w, rect.height());
+    right = image.copy(rect.x()+w, rect.y(), w, rect.height());
+    gui_displayer->updateImage(left, false);
+    gui_displayer->updateImage(right, true);
+    START_DISPLAY();
 }
 
 void UIGroupImage::onPushBtnLoadLeftVideoClicked()
 {
     LOAD(_data_path, video, left);
     CALLBACK(EVENT_LOAD_LEFT_VIDEO, static_cast<void*>(&_data_path));
+    START_DISPLAY();
 }
 
 void UIGroupImage::onPushBtnLoadRightVideoClicked()
 {
     LOAD(_data_path, video, right);
     CALLBACK(EVENT_LOAD_RIGHT_VIDEO, static_cast<void*>(&_data_path));
+    START_DISPLAY();
 }
 
 void UIGroupImage::onPushBtnLoadStereoVideoClicked()
 {
     LOAD(_data_path, video, stereo);
     CALLBACK(EVENT_LOAD_STEREO_VIDEO, static_cast<void*>(&_data_path));
+    START_DISPLAY();
 }
 
 
 void UIGroupImage::onPushBtnCloseClicked()
 {
-    CALLBACK(EVENT_CLOSE_DISPLAY, nullptr);
     _pbtn_pause->setText("Pause");
+    STOP_DISPLAY();
+    gui_displayer->close();
 }
 
 void UIGroupImage::onPushBtnPauseClicked()
@@ -163,10 +198,12 @@ void UIGroupImage::onPushBtnPauseClicked()
     if(_pbtn_pause->text() == "Pause"){
         CALLBACK(EVENT_PAUSE_DISPLAY, nullptr);
         _pbtn_pause->setText("Go on");
+        STOP_DISPLAY();
     }
     else{
         CALLBACK(EVENT_GOON_DISPLAY, nullptr);
         _pbtn_pause->setText("Pause");
+        START_DISPLAY();
     }
 }
 

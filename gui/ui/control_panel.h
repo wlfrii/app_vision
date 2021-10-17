@@ -12,16 +12,12 @@ public:
     ControlPanel(QWidget *parent = nullptr);
     ~ControlPanel();
 
-    //static QTimer* timer_imshow;
-    //static QTimer* timer_vdshow;
-
+    static QTimer* display_timer;
 private:
     void setupUI();
 
-
 private slots:
-    void onTimerImshow();
-    void onTimerVdshow();
+    void onTimerShow();
 };
 
 } // namespace::gui

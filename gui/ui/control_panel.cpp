@@ -5,19 +5,21 @@
 #include "ui_group_enhance.h"
 #include "ui_group_rectify.h"
 #include <QFont>
+#include "../display/displayer.h"
 
 namespace gui{
+Displayer* gui_displayer = nullptr;
 
-//QTimer* ControlPanel::timer_imshow = new QTimer();
-//QTimer* ControlPanel::timer_vdshow = new QTimer();
+QTimer* ControlPanel::display_timer = new QTimer();
 
 ControlPanel::ControlPanel(QWidget *parent)
     : QWidget(parent)
 {
     setupUI();
+    connect(display_timer, &QTimer::timeout, this,
+            &ControlPanel::onTimerShow);
 
-//    connect(timer_imshow, &QTimer::timeout, this, &ControlPanel::onTimerImshow);
-//    connect(timer_vdshow, &QTimer::timeout, this, &ControlPanel::onTimerVdshow);
+    gui_displayer = new Displayer(960, 270, Displayer::DISPLAY_3D);
 }
 
 
@@ -67,18 +69,10 @@ void ControlPanel::setupUI()
     this->setLayout(hlayout);
 }
 
-void ControlPanel::onTimerImshow()
+void ControlPanel::onTimerShow()
 {
-    //VisionManager::getInstance()->showImage();
-    UILog("to be finished");
+    gui_displayer->show();
 }
 
-void ControlPanel::onTimerVdshow()
-{
-    //if(!VisionManager::getInstance()->showVideo()){
-    //    timer_vdshow->stop();
-    //}
-    UILog("to be finished");
-}
 
 } // namespace::gui
